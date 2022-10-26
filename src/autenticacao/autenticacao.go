@@ -2,7 +2,7 @@ package autenticacao
 
 import (
 	"api/src/config"
-	//"errors"
+	"errors"
 	"fmt"
 	//"strconv"
 	"strings"
@@ -24,34 +24,31 @@ func CriarToken(usuarioID uint64) (string, error) {
 
 // ValidarToken verifica se o token passado na requisição é valido
 func ValidarToken(c *gin.Context) error {
-	
 	tokenString := extrairToken(c)
 	token, erro := jwt.Parse(tokenString, retornarChaveDeVerificacao)//vai estar num formato que de pra ler
 	if erro != nil {
 		return erro
 	}
-	
 	fmt.Println(token)
-	return nil
-/* 	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
+	if _, ok := token.Claims.(jwt.MapClaims); ok && token.Valid { 
+		fmt.Println("TOKEN VÁLIDO")
 		return nil
 	}
-
-	return errors.New("Token inválido") */
+	return errors.New("token inválido")
 }
 
 func extrairToken(c *gin.Context) string{
-	token := c.GetHeader("Authorization") 
-	//token := r.Header.Get("Authorization")
-	if len(strings.Split(token, " ")) == 2 {
+	token := c.Request.Header.Get("Authorization")
+	if len(strings.Split(token, " ")) == 2 { //pq retorna "BearerToken chave"
 		return strings.Split(token, " ")[1]
 	}
 	return ""
 }
 
+//verifica se o método de assinatura é o que esperamos
 func retornarChaveDeVerificacao(token *jwt.Token) (interface{}, error) {
 	if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 		return nil, fmt.Errorf("método de assinatura inesperado! %v", token.Header["alg"])
 	}
-	return config.SecretKey, nil
+	return config.SecretKey, nil //se for o método esperado, retorna a chave de verificação
 }

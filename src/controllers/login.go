@@ -51,7 +51,3 @@ if erro != nil{
 	}
 	fmt.Printf("Token: %s", token)
 }
-
-func Ping(context *gin.Context) {
-	context.JSON(http.StatusOK, gin.H{"message": "pong"})
-}
